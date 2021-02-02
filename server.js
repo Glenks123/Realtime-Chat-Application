@@ -16,12 +16,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Run when client connects
 io.on('connection', socket => {
-    //socket.emit allows us to send a message to be received by socket.on and log it onto the console
     console.log('New WS connection...');
 
     socket.on('joinChatRoom', ({ username, room }) => {
 
-        //User is an OBJECT
         const user = userJoin(socket.id, username, room);
         //console.log(user)
 
@@ -34,7 +32,6 @@ io.on('connection', socket => {
         //to(user.room) broadcasts the message to the specific room
         socket.broadcast.to(user.room).emit('message',  formatMessage(bot, `${user.username} has joined the chat.`));
 
-        // Sends the specific room and all the users in that room
         io.to(user.room).emit('roomUsers', {
             room: user.room,
             users: getRoomUsers(user.room)
@@ -52,11 +49,8 @@ io.on('connection', socket => {
     socket.on('disconnect', () => {
         const user = userLeave(socket.id);
 
-        // if user exists
         if (user){
-            //io.emit() sends to the entire server
             io.to(user.room).emit('message',  formatMessage(bot, `${user.username} has left the chat`));
-            // Send user and room info
             io.to(user.room).emit('roomUsers', {
                 room: user.room,
                 users: getRoomUsers(user.room)
